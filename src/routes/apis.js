@@ -18,8 +18,6 @@ app.get('/public', PublicController.getPublicData);
 // Company
 app.get('/company/reed', PublicController.reedCompany);
 
-
-
 // Here are the private routes
 app.use(authMiddleware);
 app.get('/roles', PrivateController.getRoles);

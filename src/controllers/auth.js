@@ -40,7 +40,11 @@ const AuthController = {
                     if (err) {
                         res.status(500).json({ error: err.message });
                     } else {
-                        const token = jwt.sign({ userId }, secretKey);
+                        const payload = {
+                            userId: userId,
+                            roles: ['external']
+                        };
+                        const token = jwt.sign(payload, secretKey);
                         const id = userId;
                         const status = true;
                         const message = 'User Logged In Successfully';
@@ -65,7 +69,11 @@ const AuthController = {
                     } else if (!match) {
                         res.status(401).json({ error: 'Invalid email or password' });
                     } else {
-                        token = jwt.sign({ userId: user.id }, secretKey);
+                        const payload = {
+                            userId: user.id,
+                            roles: roles
+                        };
+                        token = jwt.sign(payload, secretKey);
                         const id = user.id;
                         const status = true;
                         const message = 'User Logged In Successfully';

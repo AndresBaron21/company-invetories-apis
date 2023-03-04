@@ -4,8 +4,8 @@ const Category = require('../models/category');
 const Article = require('../models/article');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
+const jwt = require('jsonwebtoken');
 
-// const jsPDF = require("jspdf");
 require("jspdf-autotable");
 
 const PrivateController = {
@@ -30,7 +30,6 @@ const PrivateController = {
       }
       res.json(results);
     });
-    
   },
 
   // Companies controllers
@@ -234,6 +233,7 @@ const PrivateController = {
         }
     });
   },
+
 };
 
 module.exports = PrivateController;
