@@ -9,7 +9,7 @@ app.use(cors());
 app.use('/api', router);
 
 // Set the port on which the server will run
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 443;
 
 // We start the server
 app.listen(PORT, () => {
