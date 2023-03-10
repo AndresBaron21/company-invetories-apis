@@ -41,5 +41,6 @@ app.post('/article/update', PrivateController.updateArticle);
 app.post('/article/show', PrivateController.showArticle);
 app.post('/article/delete', PrivateController.deleteArticle);
 app.post('/article/pdf', PrivateController.downloadPDF);
+app.post('/article/send-email', PrivateController.sendEmail);
 
 module.exports = app;

@@ -5,6 +5,7 @@ const Article = require('../models/article');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
 require("jspdf-autotable");
 
@@ -201,26 +202,26 @@ const PrivateController = {
         } else {
             try {
                     // Get the data from the items table
-                    const articles = result;
+                    const articlesP = result;
                     
                     // Create a new PDF document
                     const doc = new PDFDocument();
 
                     // Add the title to the document
-                    doc.fontSize(20).text('List of articles', {align: 'center'}).moveDown();
+                    doc.fontSize(20).text('List of articlesP', {align: 'center'}).moveDown();
 
                     // Add item data to the document
-                    articles.forEach(article => {
+                    articlesP.forEach(article => {
                     doc.fontSize(16).text(`${article.name}:  ${article.description}`);
                     });
 
                     // Download the PDF file
-                    doc.pipe(fs.createWriteStream('articles.pdf'));
+                    doc.pipe(fs.createWriteStream('articlesP.pdf'));
                     doc.end();
                     // console.log('The PDF file has been downloaded successfully');
 
                     // Send the PDF file as a response to the client
-                    res.download('articles.pdf', 'my_file.pdf', (err) => {
+                    res.download('articlesP.pdf', 'my_file.pdf', (err) => {
                         if (err) {
                             console.log(err);
                             res.status(500).json({ error: 'No se pudo descargar el archivo PDF.' });
@@ -232,6 +233,84 @@ const PrivateController = {
             }
         }
     });
+  },
+  sendEmail: (req, res) => {
+    const { 
+        category_id, 
+        sender_email, 
+        sender_password, 
+        email_recipient, 
+        subject, 
+        message 
+    } = req.body;
+
+    try {
+        // Obtener los datos de los artículos de la categoría especificada
+        Category.getArticles(category_id, async (err, result) => {
+            if (err) {
+                res.status(500).json({ error: err.message });
+            } else {
+                try {
+                    // Get article data
+                    const articles = result;
+
+                    // Create a new PDF document
+                    const doc = new PDFDocument();
+
+                    // Add the title to the document
+                    doc.fontSize(20).text('List of articles', {align: 'center'}).moveDown();
+
+                    // Add item data to the document
+                    articles.forEach(article => {
+                        doc.fontSize(16).text(`${article.name}: ${article.description}`);
+                    });
+
+                    // Save the PDF file on the server
+                    doc.pipe(fs.createWriteStream('articles.pdf'));
+                    doc.end();
+
+                    // Configure the transporter object with the data from the email service
+                    const transporter = nodemailer.createTransport({
+                        host: 'smtp.office365.com',
+                        port: 587,
+                        auth: {
+                            user: sender_email,
+                            pass: sender_password,
+                        },
+                        tls: {
+                            ciphers: 'SSLv3'
+                        }
+                    });
+
+                    // Configure the options of the email with the attached PDF file
+                    const mailOptions = {
+                        from: sender_email,
+                        to: email_recipient,
+                        subject: subject,
+                        text: message,
+                        attachments: [{
+                            filename: 'articles.pdf',
+                            path: 'articles.pdf',
+                            contentType: 'application/pdf'
+                        }]
+                    };
+
+                    // Send the email
+                    await transporter.sendMail(mailOptions);
+
+                    // Send a response to the customer indicating that the email was sent successfully
+                    res.status(200).send('Email sent successfully');
+
+                } catch (error) {
+                    console.log(error);
+                    throw new Error('An error occurred while sending the email');
+                }
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Email could not be sent');
+    }
   },
 
 };
